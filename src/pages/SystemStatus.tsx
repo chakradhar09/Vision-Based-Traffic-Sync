@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTraffic } from '../context/TrafficContext';
-import { Activity, Server, Cpu, Database, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Activity, Server, Cpu, Database, CheckCircle } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 export const SystemStatus: React.FC = () => {

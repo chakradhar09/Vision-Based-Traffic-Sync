@@ -8,10 +8,23 @@ interface LaneCardProps {
   lane: LaneStatus;
 }
 
+const DENSITY_THRESHOLDS = {
+  HIGH: 15,
+  MEDIUM: 8,
+} as const;
+
 export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetUploadStatus = (status: 'idle' | 'success' | 'error', delay = 3000) => {
+    setUploadStatus(status);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (status !== 'idle') {
+      timeoutRef.current = setTimeout(() => setUploadStatus('idle'), delay);
+    }
+  };
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -43,20 +56,16 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
     if (!file) return;
 
     // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      setUploadStatus('error');
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);
+      resetUploadStatus('error');
       return;
     }
 
     // Validate file size (5MB max)
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
     if (file.size > MAX_FILE_SIZE) {
-      setUploadStatus('error');
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);
+      resetUploadStatus('error');
       return;
     }
 
@@ -70,9 +79,7 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
       if (!webhookUrl) {
         logger.warn("VITE_N8N_WEBHOOK_URL is not set. Simulating upload.", { laneId: lane.lane_id });
         await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
-        setUploadStatus('success');
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);
+        resetUploadStatus('success');
         return;
       }
 
@@ -100,15 +107,11 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
         throw new Error(`Webhook upload failed: ${response.statusText}`);
       }
 
-      setUploadStatus('success');
+      resetUploadStatus('success');
       logger.info("File uploaded successfully", { laneId: lane.lane_id, fileSize: file.size });
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);
     } catch (error) {
       logger.error("Error uploading to webhook", error, { laneId: lane.lane_id, fileSize: file.size });
-      setUploadStatus('error');
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);
+      resetUploadStatus('error');
     } finally {
       setIsUploading(false);
     }
@@ -151,7 +154,7 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
           <div>
             <div className="text-zinc-500 text-xs font-medium uppercase">Density</div>
             <div className="text-white font-mono text-lg font-bold">
-              {lane.vehicle_count > 15 ? 'HIGH' : lane.vehicle_count > 8 ? 'MED' : 'LOW'}
+              {lane.vehicle_count > DENSITY_THRESHOLDS.HIGH ? 'HIGH' : lane.vehicle_count > DENSITY_THRESHOLDS.MEDIUM ? 'MED' : 'LOW'}
             </div>
           </div>
         </div>

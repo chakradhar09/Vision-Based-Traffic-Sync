@@ -110,6 +110,8 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (docSnap.exists()) {
         setNextIntersection(docSnap.data() as NextIntersection);
       }
+    }, (error) => {
+      logger.error("Error fetching next_intersection", error);
     });
 
     return () => {

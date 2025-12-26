@@ -24,9 +24,7 @@ const isFirebaseConfigValid = (): boolean => {
     firebaseConfig.apiKey &&
     firebaseConfig.authDomain &&
     firebaseConfig.projectId &&
-    typeof firebaseConfig.apiKey === 'string' &&
-    typeof firebaseConfig.authDomain === 'string' &&
-    typeof firebaseConfig.projectId === 'string'
+    firebaseConfig.storageBucket
   );
 };
 
