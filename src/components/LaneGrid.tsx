@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 export const LaneGrid: React.FC = () => {
   const { lanes, connectionStatus } = useTraffic();
-  const laneIds = ['lane1', 'lane2', 'lane3', 'lane4'];
+  const laneIds = ['lane_1', 'lane_2', 'lane_3', 'lane_4'];
 
   if (connectionStatus === 'connecting' && Object.keys(lanes).length === 0) {
     return (
@@ -24,7 +24,7 @@ export const LaneGrid: React.FC = () => {
            // Fallback if lane data not yet available
            return (
              <div key={laneId} className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col items-center justify-center h-full shadow-xl animate-pulse">
-               <div className="text-zinc-600">Waiting for {laneId} signal...</div>
+               <div className="text-zinc-600">Waiting for {laneId.replace('_', ' ')} signal...</div>
              </div>
            );
         }
