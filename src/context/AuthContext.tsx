@@ -3,10 +3,6 @@ import { auth } from '../firebase';
 import { onAuthStateChanged, User, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { logger } from '../utils/logger';
 
-// Mock user type for demo mode - matches Firebase User interface structure
-// Note: We are using a full User mock below instead of this interface
-// interface MockUser { ... }
-
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;

@@ -61,7 +61,7 @@ export const SystemStatus: React.FC = () => {
               </div>
               <div className={twMerge("px-3 py-1 rounded-full text-xs font-bold uppercase", 
                 n8nStatus === 'connected' ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400")}>
-                {n8nStatus === 'connected' ? 'Online' : 'Not Configured'}
+                {n8nStatus === 'connected' ? 'Configured' : 'Not Configured'}
               </div>
             </div>
             <div className="space-y-3">

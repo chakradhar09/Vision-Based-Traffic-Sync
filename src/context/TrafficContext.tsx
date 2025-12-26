@@ -70,7 +70,12 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const unsubscribeLanes = onSnapshot(collection(db, 'lane_stats'), (snapshot) => {
       const newLanes: Record<string, LaneStatus> = {};
       snapshot.forEach((doc) => {
-        newLanes[doc.id] = doc.data() as LaneStatus;
+        const data = doc.data();
+        if (data && 'lane_id' in data) {
+          newLanes[doc.id] = data as LaneStatus;
+        } else {
+          logger.error("Invalid lane document structure", { docId: doc.id, data });
+        }
       });
       
       // Initialize lanes if empty and not already initializing
@@ -108,7 +113,12 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Subscribe to next_intersection
     const unsubscribeNext = onSnapshot(doc(db, 'next_intersection', 'intersection_1'), (docSnap) => {
       if (docSnap.exists()) {
-        setNextIntersection(docSnap.data() as NextIntersection);
+        const data = docSnap.data();
+        if (data && 'intersection_id' in data) {
+          setNextIntersection(data as NextIntersection);
+        } else {
+          logger.error("Invalid next_intersection document structure", { data });
+        }
       }
     }, (error) => {
       logger.error("Error fetching next_intersection", error);

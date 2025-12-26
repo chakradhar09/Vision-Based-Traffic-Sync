@@ -92,23 +92,25 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
+        if (!response.ok) {
+          throw new Error(`Webhook upload failed: ${response.statusText}`);
+        }
 
-      if (!response.ok) {
-        throw new Error(`Webhook upload failed: ${response.statusText}`);
+        resetUploadStatus('success');
+        logger.info("File uploaded successfully", { laneId: lane.lane_id, fileSize: file.size });
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      resetUploadStatus('success');
-      logger.info("File uploaded successfully", { laneId: lane.lane_id, fileSize: file.size });
     } catch (error) {
       logger.error("Error uploading to webhook", error, { laneId: lane.lane_id, fileSize: file.size });
       resetUploadStatus('error');
@@ -209,14 +211,14 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
             
             <input 
               type="file" 
-              accept="image/*" 
+              accept="image/jpeg,image/png,image/webp" 
               className="hidden" 
               onChange={handleFileUpload}
               disabled={isUploading}
             />
           </label>
           <div className="text-center">
-             <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Supports JPG/PNG • Max 5MB</span>
+             <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Supports JPG/PNG/WEBP • Max 5MB</span>
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ let storage: FirebaseStorage | undefined;
 let auth: Auth | undefined;
 
 // Validate Firebase configuration
+// Note: We only check essential fields. messagingSenderId and appId are optional for our current usage.
 const isFirebaseConfigValid = (): boolean => {
   return !!(
     firebaseConfig.apiKey &&
