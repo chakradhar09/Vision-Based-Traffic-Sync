@@ -67,7 +67,9 @@ export const SystemStatus: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-500">Webhook Endpoint</span>
-                <span className="font-mono text-xs truncate max-w-[150px]">{import.meta.env.VITE_N8N_WEBHOOK_URL || 'N/A'}</span>
+                <span className="font-mono text-xs truncate max-w-[150px]">
+                  {import.meta.env.VITE_N8N_WEBHOOK_URL ? 'Configured' : 'N/A'}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-500">Uptime</span>
