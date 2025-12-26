@@ -19,8 +19,9 @@ export const Login: React.FC = () => {
     try {
       await login(email, password);
       navigate('/');
-    } catch (err: any) {
-      setError('Failed to login. Please check your credentials.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to login. Please check your credentials.';
+      setError(errorMessage);
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -83,7 +84,9 @@ export const Login: React.FC = () => {
         
         <div className="mt-6 text-center text-xs text-zinc-600">
           <p>Restricted System • Activity Monitored</p>
-          <p className="mt-1">Use: operator@traffic.com / demo123</p>
+          {import.meta.env.DEV && (
+            <p className="mt-1">Demo Mode Active</p>
+          )}
         </div>
       </div>
     </div>

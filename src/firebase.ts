@@ -1,7 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
+import { getAuth, Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,20 +12,32 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-let app;
-let db: any;
-let storage: any;
-let auth: any;
+let app: FirebaseApp | undefined;
+let db: Firestore | undefined;
+let storage: FirebaseStorage | undefined;
+let auth: Auth | undefined;
+
+// Validate Firebase configuration
+const isFirebaseConfigValid = (): boolean => {
+  return !!(
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    typeof firebaseConfig.apiKey === 'string' &&
+    typeof firebaseConfig.authDomain === 'string' &&
+    typeof firebaseConfig.projectId === 'string'
+  );
+};
 
 try {
-  // Only initialize if config is present, otherwise we'll let the app handle missing firebase
-  if (firebaseConfig.apiKey) {
+  // Only initialize if config is present and valid, otherwise we'll let the app handle missing firebase
+  if (isFirebaseConfigValid()) {
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       storage = getStorage(app);
       auth = getAuth(app);
   } else {
-      console.warn("Firebase config missing. App will run in demo mode.");
+      console.warn("Firebase config missing or invalid. App will run in demo mode.");
   }
 } catch (e) {
   console.error("Firebase init error", e);

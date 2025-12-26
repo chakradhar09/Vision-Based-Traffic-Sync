@@ -29,30 +29,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Input validation
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      throw new Error("Invalid email address");
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      throw new Error("Password must be at least 6 characters");
+    }
+
     try {
       if (auth) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
+        // Demo mode fallback - only in development
+        if (import.meta.env.DEV) {
+          const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "operator@traffic.com";
+          const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || "demo123";
+          
+          if (email === demoEmail && password === demoPassword) {
+            // Mock user object for demo
+            setCurrentUser({ email: email, uid: "demo-user" } as User);
+            return;
+          }
+        }
         throw new Error("Auth not initialized");
       }
     } catch (error) {
       console.error("Login failed", error);
-      // Fallback for demo without valid backend
-      if (email === "operator@traffic.com" && password === "demo123") {
-         // Mock user object
-         setCurrentUser({ email: email, uid: "demo-user" } as User);
-         return;
-      }
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await firebaseSignOut(auth);
+      if (auth) {
+        await firebaseSignOut(auth);
+      }
       setCurrentUser(null);
     } catch (error) {
        console.error("Logout failed", error);
+       // Always clear user state even if logout fails
        setCurrentUser(null);
     }
   };
