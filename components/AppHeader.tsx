@@ -14,7 +14,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ bestRoute }) => {
             <Activity className="text-white w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">Hyderabad Traffic Sync</h1>
+            <h1 className="text-xl font-bold tracking-tight text-white">Vision-Based Traffic Sync</h1>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <p className="text-xs text-slate-400 font-mono uppercase tracking-wider">
