@@ -43,6 +43,13 @@ try {
   }
 } catch (e) {
   logger.error("Firebase init error", e);
+  if (import.meta.env.DEV) {
+    logger.warn("Firebase config keys present", {
+      hasApiKey: !!firebaseConfig.apiKey,
+      hasAuthDomain: !!firebaseConfig.authDomain,
+      hasProjectId: !!firebaseConfig.projectId,
+    });
+  }
 }
 
 export { db, storage, auth };

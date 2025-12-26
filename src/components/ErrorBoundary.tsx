@@ -76,7 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     {this.state.error.toString()}
                   </p>
                   {this.state.errorInfo && (
-                    <details className="mt-4">
+                    <details className="mt-4" open={import.meta.env.DEV}>
                       <summary className="text-zinc-500 text-sm cursor-pointer hover:text-zinc-400">
                         Stack Trace
                       </summary>

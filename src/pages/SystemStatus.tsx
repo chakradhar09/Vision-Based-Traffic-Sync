@@ -30,7 +30,11 @@ export const SystemStatus: React.FC = () => {
                 {connectionStatus}
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 relative">
+              {/* Overlay for demo mode indication */}
+               <div className="absolute -top-2 -right-2">
+                <span className="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded border border-zinc-700">Demo Data</span>
+              </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-500">Latency</span>
                 <span className="font-mono">24ms</span>
@@ -110,7 +114,7 @@ export const SystemStatus: React.FC = () => {
         <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
             <Activity size={20} className="text-zinc-400" />
-            Recent System Activity
+            Recent System Activity <span className="text-xs font-normal text-zinc-500 ml-2">(Sample Logs)</span>
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

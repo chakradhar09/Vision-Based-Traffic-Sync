@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { collection, onSnapshot, doc, updateDoc, Timestamp, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { LaneStatus, NextIntersection } from '../types';
@@ -18,6 +18,7 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [lanes, setLanes] = useState<Record<string, LaneStatus>>({});
   const [nextIntersection, setNextIntersection] = useState<NextIntersection | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+  const initializingRef = useRef(false);
 
   useEffect(() => {
     if (!db) {
@@ -72,8 +73,9 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
         newLanes[doc.id] = doc.data() as LaneStatus;
       });
       
-      // Initialize lanes if empty
-      if (snapshot.empty) {
+      // Initialize lanes if empty and not already initializing
+      if (snapshot.empty && !initializingRef.current) {
+        initializingRef.current = true;
         const laneIds = ['lane_1', 'lane_2', 'lane_3', 'lane_4'];
         const initPromises = laneIds.map(async (laneId) => {
           const initialLane: LaneStatus = {
@@ -88,9 +90,12 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
           await setDoc(doc(db, 'lane_stats', laneId), initialLane);
         });
         // Fire and forget - errors handled by Firestore listener
-        Promise.all(initPromises).catch((error) => {
-          logger.error("Error initializing lanes", error);
-        });
+        Promise.all(initPromises)
+          .then(() => { initializingRef.current = false; })
+          .catch((error) => {
+            logger.error("Error initializing lanes", error);
+            initializingRef.current = false;
+          });
       }
       
       setLanes(newLanes);
