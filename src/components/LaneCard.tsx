@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { LaneStatus } from '../types';
 import { Upload, AlertTriangle, Car, Activity, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { logger } from '../utils/logger';
 
 interface LaneCardProps {
   lane: LaneStatus;
@@ -67,7 +68,7 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
       const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
 
       if (!webhookUrl) {
-        console.warn("VITE_N8N_WEBHOOK_URL is not set. Simulating upload.");
+        logger.warn("VITE_N8N_WEBHOOK_URL is not set. Simulating upload.", { laneId: lane.lane_id });
         await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
         setUploadStatus('success');
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -94,10 +95,11 @@ export const LaneCard: React.FC<LaneCardProps> = ({ lane }) => {
       }
 
       setUploadStatus('success');
+      logger.info("File uploaded successfully", { laneId: lane.lane_id, fileSize: file.size });
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);
     } catch (error) {
-      console.error("Error uploading to webhook:", error);
+      logger.error("Error uploading to webhook", error, { laneId: lane.lane_id, fileSize: file.size });
       setUploadStatus('error');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setUploadStatus('idle'), 3000);

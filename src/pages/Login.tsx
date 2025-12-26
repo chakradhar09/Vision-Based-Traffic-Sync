@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
+import { logger } from '../utils/logger';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,11 +19,12 @@ export const Login: React.FC = () => {
 
     try {
       await login(email, password);
+      logger.info("User logged in successfully", { email });
       navigate('/');
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to login. Please check your credentials.';
+      logger.error("Login attempt failed", err, { email });
       setError(errorMessage);
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }

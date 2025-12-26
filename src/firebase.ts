@@ -2,6 +2,7 @@ import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getAuth, Auth } from 'firebase/auth';
+import { logger } from './utils/logger';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -36,11 +37,12 @@ try {
       db = getFirestore(app);
       storage = getStorage(app);
       auth = getAuth(app);
+      logger.info("Firebase initialized successfully");
   } else {
-      console.warn("Firebase config missing or invalid. App will run in demo mode.");
+      logger.warn("Firebase config missing or invalid. App will run in demo mode.");
   }
 } catch (e) {
-  console.error("Firebase init error", e);
+  logger.error("Firebase init error", e);
 }
 
 export { db, storage, auth };

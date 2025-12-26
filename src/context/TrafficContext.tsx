@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { collection, onSnapshot, doc, updateDoc, Timestamp, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { LaneStatus, NextIntersection } from '../types';
+import { logger } from '../utils/logger';
 
 interface TrafficContextType {
   lanes: Record<string, LaneStatus>;
@@ -88,14 +89,14 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
         });
         // Fire and forget - errors handled by Firestore listener
         Promise.all(initPromises).catch((error) => {
-          console.error("Error initializing lanes:", error);
+          logger.error("Error initializing lanes", error);
         });
       }
       
       setLanes(newLanes);
       setConnectionStatus('connected');
     }, (error) => {
-      console.error("Error fetching lanes:", error);
+      logger.error("Error fetching lanes", error);
       setConnectionStatus('disconnected');
     });
 
@@ -114,7 +115,7 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const toggleEmergency = async (isActive: boolean) => {
     if (!db) {
-      console.log("Demo mode: Toggling emergency to", isActive);
+      logger.info("Demo mode: Toggling emergency", { isActive });
       const newLanes = { ...lanes };
       Object.keys(newLanes).forEach(key => {
         newLanes[key] = { 
@@ -143,8 +144,9 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })
       );
       await Promise.all(updates);
+      logger.info("Emergency mode toggled", { isActive, laneCount: laneIds.length });
     } catch (error) {
-      console.error("Error toggling emergency:", error);
+      logger.error("Error toggling emergency", error, { isActive });
       throw error; // Re-throw to allow caller to handle
     }
   };
@@ -162,8 +164,9 @@ export const TrafficProvider: React.FC<{ children: React.ReactNode }> = ({ child
         ...status,
         last_updated: Timestamp.now()
       });
+      logger.debug("Lane status updated", { laneId, status });
     } catch (error) {
-      console.error("Error updating lane:", error);
+      logger.error("Error updating lane", error, { laneId });
       throw error; // Re-throw to allow caller to handle
     }
   };

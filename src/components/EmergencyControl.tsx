@@ -2,6 +2,7 @@ import React from 'react';
 import { useTraffic } from '../context/TrafficContext';
 import { AlertOctagon, ShieldAlert } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { logger } from '../utils/logger';
 
 export const EmergencyControl: React.FC = () => {
   const { lanes, toggleEmergency } = useTraffic();
@@ -20,9 +21,10 @@ export const EmergencyControl: React.FC = () => {
     try {
       setIsToggling(true);
       await toggleEmergency(!isActive);
+      logger.info("Emergency control toggled", { newState: !isActive });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to toggle emergency mode";
-      console.error("Failed to toggle emergency:", error);
+      logger.error("Failed to toggle emergency", error, { currentState: isActive });
       setError(errorMessage);
       // Clear error after 5 seconds
       setTimeout(() => setError(null), 5000);
