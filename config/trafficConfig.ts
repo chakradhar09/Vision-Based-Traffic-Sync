@@ -23,7 +23,7 @@ export const TRAFFIC_CONFIG = {
   // Signal timing
   MIN_GREEN_TIME: 10,
   MAX_GREEN_TIME: 60,
-  EMERGENCY_GREEN_TIME: 60,
+  EMERGENCY_GREEN_TIME: 30, // Increased to 30 seconds for better visibility
   EMERGENCY_CLEARANCE_TIMER: 5,
   DEFAULT_EMPTY_TIMER: 10,
   TIMER_REDUCTION_RATE: 1, // seconds per tick

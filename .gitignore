@@ -29,10 +29,10 @@ dist-ssr
 .env.*.local
 
 # Test results
-.
 testsprite_tests/
+.testsprite_tests/
 doc/
-
+.doc/
 
 # Backend build
 server/dist

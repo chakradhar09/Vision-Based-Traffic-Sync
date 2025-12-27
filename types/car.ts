@@ -8,5 +8,6 @@ export interface VisualCar {
   exiting: boolean;
   exitingAt?: number;
   isAmbulance: boolean;
+  stoppedAtFront?: number; // Timestamp when ambulance stopped at front (index 0)
 }
 

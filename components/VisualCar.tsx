@@ -44,9 +44,13 @@ export const VisualCar: React.FC<VisualCarProps> = ({
   };
 
   // Positioning Logic
+  // If ambulance is stopped at front, keep it at front position
+  const isStopped = car.isAmbulance && car.index === 0 && car.stoppedAtFront;
   const carPosition = car.exiting
     ? -TRAFFIC_CONFIG.CAR_EXIT_OFFSET
-    : TRAFFIC_CONFIG.CAR_STOP_LINE_OFFSET + car.index * TRAFFIC_CONFIG.CAR_SPACING;
+    : isStopped
+      ? TRAFFIC_CONFIG.CAR_STOP_LINE_OFFSET // Keep at front when stopped
+      : TRAFFIC_CONFIG.CAR_STOP_LINE_OFFSET + car.index * TRAFFIC_CONFIG.CAR_SPACING;
 
   if (laneId === 'lane_1') {
     // Top, facing down
@@ -81,7 +85,7 @@ export const VisualCar: React.FC<VisualCarProps> = ({
         isAmbulance
           ? 'bg-slate-100 border border-slate-300 shadow-xl'
           : 'bg-slate-300 shadow-lg shadow-black/60'
-      }`}
+      } ${isStopped ? 'animate-pulse-slow' : ''}`} // Add pulse animation when stopped
     >
       {isAmbulance && (
         <AmbulanceVisuals laneId={laneId} roadOrientation={roadOrientation} />

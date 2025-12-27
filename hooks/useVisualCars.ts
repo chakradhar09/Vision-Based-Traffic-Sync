@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, MutableRefObject } from 'react';
 import { LaneId, LaneStatus } from '../types';
 import { TRAFFIC_CONFIG } from '../config/trafficConfig';
 import { VisualCar } from '../types/car';
@@ -36,10 +36,7 @@ export function useVisualCars(lanes: LaneStatus[]) {
         const activeCount = activeCars.length;
         const targetCount = lane.vehicleCount;
 
-        // 3. Update Ambulance Status
-        newLaneCars = updateAmbulanceStatus(newLaneCars, activeCars, lane.isEmergency);
-
-        // 4. Add or Remove Cars to match targetCount
+        // 3. Add or Remove Cars to match targetCount
         if (targetCount > activeCount) {
           newLaneCars = addCarsToLane(
             newLaneCars,
@@ -52,6 +49,10 @@ export function useVisualCars(lanes: LaneStatus[]) {
         } else if (targetCount < activeCount) {
           newLaneCars = removeCarsFromLane(newLaneCars, activeCount - targetCount, now);
         }
+
+        // 4. Update Ambulance Status (after add/remove to catch when it reaches front)
+        const updatedActiveCars = newLaneCars.filter(c => !c.exiting);
+        newLaneCars = updateAmbulanceStatus(newLaneCars, updatedActiveCars, lane.isEmergency);
 
         nextState[laneId] = newLaneCars;
       });
@@ -95,20 +96,37 @@ function updateAmbulanceStatus(
   isEmergency: boolean
 ): VisualCar[] {
   const existingAmbulance = activeCars.find(c => c.isAmbulance);
+  const now = Date.now();
+  const AMBULANCE_STOP_DURATION = 10000; // 10 seconds
 
   if (isEmergency && !existingAmbulance && activeCars.length > 0) {
-    // Pick a random car to be the ambulance
-    const randomIndex = Math.floor(Math.random() * activeCars.length);
-    const targetCar = activeCars[randomIndex];
+    // Place ambulance at the END of the lane (highest index)
+    const lastCar = activeCars[activeCars.length - 1];
+    return cars.map(c => (c.id === lastCar.id ? { ...c, isAmbulance: true } : c));
+  }
 
-    return cars.map(c => (c.id === targetCar.id ? { ...c, isAmbulance: true } : c));
+  // Handle ambulance stop logic when it reaches front (index 0)
+  if (isEmergency && existingAmbulance) {
+    return cars.map(c => {
+      if (c.id === existingAmbulance.id && !c.exiting) {
+        // If ambulance is at front (index 0) and not already stopped
+        if (c.index === 0 && !c.stoppedAtFront) {
+          return { ...c, stoppedAtFront: now };
+        }
+        // If ambulance has been stopped for 10+ seconds, allow it to proceed
+        if (c.stoppedAtFront && (now - c.stoppedAtFront >= AMBULANCE_STOP_DURATION)) {
+          return { ...c, stoppedAtFront: undefined };
+        }
+      }
+      return c;
+    });
   }
 
   if (!isEmergency) {
     // Revert active cars to normal if emergency is cancelled
     return cars.map(c => {
       if (!c.exiting && c.isAmbulance) {
-        return { ...c, isAmbulance: false };
+        return { ...c, isAmbulance: false, stoppedAtFront: undefined };
       }
       return c;
     });
@@ -126,20 +144,17 @@ function addCarsToLane(
   toAdd: number,
   laneId: LaneId,
   isEmergency: boolean,
-  idCounter: React.MutableRefObject<number>
+  idCounter: MutableRefObject<number>
 ): VisualCar[] {
   const newCars = [...currentCars];
   const hasAmbulanceNow = newCars.some(c => !c.exiting && c.isAmbulance);
 
-  // Determine if we need to spawn an ambulance in this batch
-  let ambulanceSpawnIndex = -1;
-  if (isEmergency && !hasAmbulanceNow) {
-    ambulanceSpawnIndex = Math.floor(Math.random() * toAdd);
-  }
-
+  // If emergency and no ambulance, spawn ambulance at the END (last position)
+  // Otherwise, add normal cars
   for (let i = 0; i < toAdd; i++) {
     const newIndex = activeCount + i;
-    const isNewAmbulance = i === ambulanceSpawnIndex;
+    // Only spawn ambulance if emergency is active, no ambulance exists, and this is the last car being added
+    const isNewAmbulance = isEmergency && !hasAmbulanceNow && i === toAdd - 1;
 
     newCars.push({
       id: `car-${laneId}-${idCounter.current++}`,
@@ -160,8 +175,21 @@ function removeCarsFromLane(
   toRemove: number,
   now: number
 ): VisualCar[] {
+  const AMBULANCE_STOP_DURATION = 10000; // 10 seconds
+  
   return cars.map(c => {
     if (!c.exiting) {
+      // If ambulance is stopped at front, don't remove it yet
+      if (c.isAmbulance && c.index === 0 && c.stoppedAtFront) {
+        // If still within stop duration, keep it at front
+        if (now - c.stoppedAtFront < AMBULANCE_STOP_DURATION) {
+          return c; // Don't move or remove ambulance yet
+        }
+        // Stop duration passed, allow it to proceed
+        return { ...c, stoppedAtFront: undefined, exiting: true, exitingAt: now };
+      }
+      
+      // Normal car removal logic
       if (c.index < toRemove) {
         return { ...c, exiting: true, exitingAt: now };
       } else {

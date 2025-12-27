@@ -26,11 +26,8 @@ export function useTrafficSimulation(
               Math.random() * (TRAFFIC_CONFIG.OUTFLOW_MAX - TRAFFIC_CONFIG.OUTFLOW_MIN + 1)
             ) + TRAFFIC_CONFIG.OUTFLOW_MIN;
             
-            // Handle emergency clearance
-            if (isEmergency && outflow > 0 && newCount > 0) {
-              isEmergency = false;
-              timer = TRAFFIC_CONFIG.EMERGENCY_CLEARANCE_TIMER;
-            }
+            // Don't clear emergency here - let useTrafficCycle handle it based on timer
+            // Emergency should persist for the full timer duration set in useTrafficCycle
 
             newCount = Math.max(TRAFFIC_CONFIG.MIN_VEHICLE_COUNT, newCount - outflow);
             

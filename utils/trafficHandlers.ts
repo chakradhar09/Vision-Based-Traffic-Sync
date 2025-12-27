@@ -83,7 +83,14 @@ export function createTrafficHandlers(
               return { ...l, isEmergency: false, timer: TRAFFIC_CONFIG.EMERGENCY_CLEARANCE_TIMER };
             }
             const newCount = isActivating ? l.vehicleCount + 1 : l.vehicleCount;
-            return { ...l, isEmergency: isActivating, vehicleCount: newCount };
+            // When activating emergency, set timer to EMERGENCY_GREEN_TIME and ensure lane is green
+            return { 
+              ...l, 
+              isEmergency: isActivating, 
+              vehicleCount: newCount,
+              timer: isActivating ? TRAFFIC_CONFIG.EMERGENCY_GREEN_TIME : l.timer,
+              status: isActivating ? 'green' : l.status
+            };
           }
           if (isActivating && l.isEmergency) {
             return { ...l, isEmergency: false };

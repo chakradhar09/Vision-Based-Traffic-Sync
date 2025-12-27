@@ -76,13 +76,17 @@ const TrafficMap: React.FC = () => {
       if (!existingScript) {
         const script = document.createElement('script');
         script.id = scriptId;
-        // Ensure API KEY is treated safely
-        const apiKey = process.env.API_KEY || '';
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        // Use VITE_GOOGLE_MAPS_API_KEY for Google Maps (client-side required)
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+        if (!apiKey) {
+          setError("Google Maps API key not configured. Please set VITE_GOOGLE_MAPS_API_KEY in your .env file.");
+          return;
+        }
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry`;
         script.async = true;
         script.defer = true;
         script.onload = loadMap;
-        script.onerror = () => setError("Failed to load Google Maps script. Network error or blocked.");
+        script.onerror = () => setError("Failed to load Google Maps script. Check network and API key configuration.");
         document.head.appendChild(script);
       } else {
         // If script exists but google object isn't ready yet, wait for load

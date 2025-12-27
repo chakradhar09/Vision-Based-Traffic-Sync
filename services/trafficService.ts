@@ -1,72 +1,36 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { SingleLaneAnalysisResult, LaneStatus, LaneId } from "../types";
 import { TRAFFIC_CONFIG, calculateGreenTime } from "../config/trafficConfig";
 import { logger } from "../utils/logger";
 
-const SYSTEM_INSTRUCTION = `
-You are an advanced Traffic Control AI Agent monitoring a single lane feed.
-Your job is to analyze the image from one specific camera at a 4-way intersection.
-
-1.  **Count** the number of motorized vehicles waiting in the queue for this specific lane view.
-2.  **Identify** if there are any active emergency vehicles (Ambulance, Fire Truck, Police) with flashing lights in this lane.
-
-Return the data in a strict JSON format.
-`;
+/**
+ * Backend API URL - points to secure backend server
+ * API keys are kept server-side only, never exposed to browser
+ */
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 export const analyzeLaneImage = async (base64Image: string, laneLabel: string): Promise<SingleLaneAnalysisResult> => {
   try {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      throw new Error("API Key is missing.");
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              mimeType: "image/jpeg",
-              data: base64Image,
-            },
-          },
-          {
-            text: `Analyze this traffic camera feed for the ${laneLabel}. Count visible waiting vehicles and check for emergencies.`,
-          },
-        ],
+    // Call backend proxy instead of direct API
+    // API key is kept server-side, never exposed to browser
+    const response = await fetch(`${BACKEND_API_URL}/api/gemini/analyze-image`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            vehicleCount: { type: Type.INTEGER, description: "Number of vehicles in the queue" },
-            emergency: { type: Type.BOOLEAN, description: "True if emergency vehicle detected" },
-            emergencyType: { 
-              type: Type.STRING, 
-              enum: ["Ambulance", "Fire Truck", "Police", "None"],
-              description: "Type of emergency vehicle if present" 
-            },
-          },
-          required: ["vehicleCount", "emergency"],
-        },
-      },
+      body: JSON.stringify({ base64Image, laneLabel }),
     });
 
-    const text = response.text;
-    if (!text) throw new Error("No response from AI");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Backend error: ${response.status}`);
+    }
 
-    const data = JSON.parse(text);
-
+    const data = await response.json();
     return {
       vehicleCount: data.vehicleCount || 0,
       emergency: data.emergency || false,
-      emergencyType: data.emergencyType === "None" ? null : data.emergencyType,
+      emergencyType: data.emergencyType || null,
     };
-
   } catch (error) {
     logger.error("Lane analysis failed", error, {
       component: 'trafficService',
@@ -112,7 +76,11 @@ export const calculateTrafficTimings = (currentLanes: LaneStatus[]): Record<Lane
 
   currentLanes.forEach(lane => {
     if (lane.id === priorityLane.id) {
-      timings[lane.id] = { status: 'green', timer: calculateGreenTime(lane.vehicleCount) };
+      // Ensure minimum green time is always enforced (even for empty lanes)
+      const greenTime = lane.vehicleCount === 0 
+        ? TRAFFIC_CONFIG.DEFAULT_EMPTY_TIMER 
+        : calculateGreenTime(lane.vehicleCount);
+      timings[lane.id] = { status: 'green', timer: greenTime };
     } else {
       timings[lane.id] = { status: 'red', timer: 0 };
     }

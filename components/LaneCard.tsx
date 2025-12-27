@@ -22,12 +22,12 @@ const LaneCard: React.FC<LaneCardProps> = ({ lane, position }) => {
     <div className={`
       absolute ${positionClasses[position]} 
       w-44 
-      backdrop-blur-md bg-slate-900/80 
-      border border-slate-700/50 
+      backdrop-blur-sm ${lane.isEmergency ? 'bg-red-950/10' : 'bg-slate-900/80'}
+      border ${lane.isEmergency ? 'border-red-500/30' : 'border-slate-700/50'}
       rounded-xl shadow-2xl 
       p-3.5 
       transition-all duration-500 ease-out
-      ${lane.isEmergency ? 'ring-2 ring-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'hover:border-slate-600'}
+      ${lane.isEmergency ? 'ring-2 ring-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'hover:border-slate-600'}
     `}>
       {/* Header */}
       <div className="flex justify-between items-start mb-3">

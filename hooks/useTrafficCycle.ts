@@ -18,6 +18,7 @@ export function useTrafficCycle(
 
         // Emergency priority handling
         if (emergencyLane) {
+          // Ensure emergency lane is green
           if (emergencyLane.status !== 'green') {
             return prevLanes.map(l => ({
               ...l,
@@ -26,18 +27,37 @@ export function useTrafficCycle(
             }));
           }
           
-          // Extend emergency timer if it's getting low
-          if (emergencyLane.timer < TRAFFIC_CONFIG.MIN_TIMER_BEFORE_SWITCH) {
+          // If ambulance is at front, set timer to 10 seconds and hold it there
+          if (emergencyLane.ambulanceAtFront === true) {
+            // Always reset timer to 10 when ambulance is at front and hold it there
+            // This ensures the timer stays at 10 for the full 10-second stop duration
+            // Don't decrement - just keep it at 10 while ambulance is stopped at front
             return prevLanes.map(l =>
-              l.id === emergencyLane.id ? { ...l, timer: TRAFFIC_CONFIG.MIN_GREEN_TIME } : l
+              l.id === emergencyLane.id ? { ...l, timer: 10 } : l
             );
           }
           
-          // Decrement timer
-          return prevLanes.map(l => ({
-            ...l,
-            timer: Math.max(0, l.timer - TRAFFIC_CONFIG.TIMER_REDUCTION_RATE)
-          }));
+          // Only decrement emergency timer when ambulance is NOT at front
+          // This allows normal countdown after the 10-second stop period
+          // But ensure we don't go below 0
+          if (emergencyLane.timer > 0) {
+            return prevLanes.map(l =>
+              l.id === emergencyLane.id ? { ...l, timer: Math.max(0, l.timer - TRAFFIC_CONFIG.TIMER_REDUCTION_RATE) } : l
+            );
+          }
+          
+          // Timer expired - clear emergency
+          return prevLanes.map(l => {
+            if (l.id === emergencyLane.id) {
+              return { 
+                ...l, 
+                isEmergency: false, 
+                timer: TRAFFIC_CONFIG.EMERGENCY_CLEARANCE_TIMER,
+                vehicleCount: Math.max(0, l.vehicleCount - 1) // Remove emergency vehicle
+              };
+            }
+            return l;
+          });
         }
 
         // If no green signal, assign to busiest lane

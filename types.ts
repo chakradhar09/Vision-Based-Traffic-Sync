@@ -9,6 +9,7 @@ export interface LaneStatus {
   status: SignalStatus;
   timer: number;
   isEmergency: boolean;
+  ambulanceAtFront?: boolean; // True when ambulance is stopped at front (index 0)
 }
 
 export interface SingleLaneAnalysisResult {
