@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Custom Scrollbar Styles - Modern Dark Theme Design */
 
 /* Webkit browsers (Chrome, Edge, Safari) */
