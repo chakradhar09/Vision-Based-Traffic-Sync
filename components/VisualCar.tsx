@@ -1,15 +1,10 @@
 import React from 'react';
 import { LaneId } from '../types';
+import { VisualCar as VisualCarType } from '../types/car';
 import { TRAFFIC_CONFIG } from '../config/trafficConfig';
 
 interface VisualCarProps {
-  car: {
-    id: string;
-    index: number;
-    exiting: boolean;
-    exitingAt?: number;
-    isAmbulance: boolean;
-  };
+  car: VisualCarType;
   laneId: LaneId;
   roadOrientation: 'vertical' | 'horizontal';
 }

@@ -1,6 +1,9 @@
 import React from 'react';
 import { LaneStatus, LaneId } from '../types';
+import { IncidentType } from '../types/incident';
 import { TRAFFIC_CONFIG } from '../config/trafficConfig';
+import { logger } from './logger';
+import { saveIncidentReport } from '../services/reportService';
 
 /**
  * Handler functions for traffic control actions
@@ -32,9 +35,35 @@ export function createTrafficHandlers(
       }));
     },
 
-    handleReportIncident: (type: string) => {
-      const laneLabel = lanes.find(l => l.id === activeLaneId)?.label;
-      addLog(`USER REPORT: Citizen reported ${type} on ${laneLabel}. Alerting TSRTC.`);
+    handleReportIncident: async (type: IncidentType) => {
+      const laneLabel = lanes.find(l => l.id === activeLaneId)?.label || 'Unknown Lane';
+      const message = `USER REPORT: Citizen reported ${type} on ${laneLabel}. Alerting TSRTC.`;
+      
+      // Log to system logs
+      addLog(message);
+      logger.info('Incident reported', { type, laneId: activeLaneId, laneLabel });
+      
+      // Save to Firebase Firestore
+      try {
+        const saved = await saveIncidentReport(type, activeLaneId, laneLabel);
+        if (saved) {
+          logger.info('Incident report saved to Firebase', {
+            type,
+            laneId: activeLaneId,
+            laneLabel,
+          });
+        } else {
+          logger.warn('Incident report saved locally only (Firebase not configured)', {
+            type,
+            laneId: activeLaneId,
+          });
+        }
+      } catch (error) {
+        logger.error('Error saving incident report', error, {
+          component: 'trafficHandlers',
+          function: 'handleReportIncident',
+        });
+      }
     },
 
     handleToggleEmergency: () => {

@@ -1,143 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { LaneStatus, LaneId } from '../types';
-import { TRAFFIC_CONFIG } from '../config/trafficConfig';
 import LaneCard from './LaneCard';
 import { VisualCar } from './VisualCar';
+import { useVisualCars } from '../hooks/useVisualCars';
 
 interface IntersectionProps {
   lanes: LaneStatus[];
 }
 
-interface VisualCar {
-  id: string;
-  index: number;
-  exiting: boolean;
-  exitingAt?: number;
-  isAmbulance: boolean;
-}
-
 const Intersection: React.FC<IntersectionProps> = ({ lanes }) => {
-  const [visualCars, setVisualCars] = useState<Record<LaneId, VisualCar[]>>({
-    lane_1: [], lane_2: [], lane_3: [], lane_4: []
-  });
-  
-  const carIdCounter = useRef(0);
-
-  // --- RECONCILIATION LOGIC ---
-  useEffect(() => {
-    setVisualCars(prev => {
-      const nextState = { ...prev };
-      const now = Date.now();
-
-      lanes.forEach(lane => {
-        const laneId = lane.id;
-        const currentCars = prev[laneId];
-        
-        // 1. Cleanup old exiting cars
-        let newLaneCars = currentCars.filter(
-          c => !c.exiting || (now - (c.exitingAt || 0) < TRAFFIC_CONFIG.CAR_EXIT_ANIMATION_DURATION)
-        );
-
-        // 2. Identify active (queueing) cars
-        const activeCars = newLaneCars.filter(c => !c.exiting);
-        const activeCount = activeCars.length;
-        const targetCount = lane.vehicleCount;
-
-        // 3. Update Ambulance Status
-        // Check if we already have an ambulance in the active queue
-        const existingAmbulance = activeCars.find(c => c.isAmbulance);
-
-        if (lane.isEmergency && !existingAmbulance) {
-           if (activeCount > 0) {
-              // Scenario: Emergency turned on, cars exist, but no ambulance designated yet.
-              // Pick a random car to be the ambulance.
-              const randomIndex = Math.floor(Math.random() * activeCount);
-              const targetCar = activeCars[randomIndex];
-              
-              newLaneCars = newLaneCars.map(c => 
-                c.id === targetCar.id ? { ...c, isAmbulance: true } : c
-              );
-           }
-        } else if (!lane.isEmergency) {
-             // Revert active cars to normal if emergency is cancelled
-             newLaneCars = newLaneCars.map(c => {
-                if (!c.exiting && c.isAmbulance) return { ...c, isAmbulance: false };
-                return c;
-             });
-        }
-
-        // 4. Add or Remove Cars to match targetCount
-        if (targetCount > activeCount) {
-          // ADD CARS
-          const toAdd = targetCount - activeCount;
-          
-          // Check if we need to spawn an ambulance in this new batch
-          // We need one if isEmergency is true AND we don't have one in the current list (activeCars + newly marked ones from step 3)
-          const hasAmbulanceNow = newLaneCars.some(c => !c.exiting && c.isAmbulance);
-          
-          let ambulanceSpawnIndex = -1;
-          if (lane.isEmergency && !hasAmbulanceNow) {
-              // Pick a random position among the new cars
-              ambulanceSpawnIndex = Math.floor(Math.random() * toAdd);
-          }
-
-          for (let i = 0; i < toAdd; i++) {
-             const newIndex = activeCount + i;
-             const isNewAmbulance = (i === ambulanceSpawnIndex);
-             
-             newLaneCars.push({
-               id: `car-${laneId}-${carIdCounter.current++}`,
-               index: newIndex,
-               exiting: false,
-               isAmbulance: isNewAmbulance
-             });
-          }
-        } else if (targetCount < activeCount) {
-          // REMOVE CARS (Traffic Flow)
-          const toRemove = activeCount - targetCount;
-          
-          // Identify the 'toRemove' cars with lowest indices to exit
-          newLaneCars = newLaneCars.map(c => {
-            if (!c.exiting) {
-               if (c.index < toRemove) {
-                 return { ...c, exiting: true, exitingAt: now };
-               } else {
-                 return { ...c, index: c.index - toRemove };
-               }
-            }
-            return c;
-          });
-        }
-
-        nextState[laneId] = newLaneCars;
-      });
-
-      return nextState;
-    });
-  }, [lanes]);
-
-  // --- CLEANUP LOOP ---
-  // Periodically force re-render to remove finished exiting cars from DOM
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisualCars(prev => {
-        let hasChanges = false;
-        const next = { ...prev };
-        const now = Date.now();
-
-        (Object.keys(next) as LaneId[]).forEach(key => {
-          const initialLen = next[key].length;
-          next[key] = next[key].filter(
-            c => !c.exiting || (now - (c.exitingAt || 0) < TRAFFIC_CONFIG.CAR_EXIT_ANIMATION_DURATION)
-          );
-          if (next[key].length !== initialLen) hasChanges = true;
-        });
-
-        return hasChanges ? next : prev;
-      });
-    }, TRAFFIC_CONFIG.CAR_CLEANUP_INTERVAL);
-    return () => clearInterval(interval);
-  }, []);
+  const visualCars = useVisualCars(lanes);
 
 
   // --- RENDERING HELPER ---

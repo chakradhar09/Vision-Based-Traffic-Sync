@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { logger } from '../utils/logger';
 
 declare global {
   interface Window {
@@ -14,7 +15,10 @@ const TrafficMap: React.FC = () => {
   useEffect(() => {
     // Global handler for Google Maps Auth Failure (Invalid Key)
     window.gm_authFailure = () => {
-      console.error("Google Maps API Authentication Error");
+      logger.error("Google Maps API Authentication Error", undefined, {
+        component: 'TrafficMap',
+        function: 'gm_authFailure',
+      });
       setError("Invalid API Key. Please check your Google Maps API configuration.");
     };
 
@@ -56,7 +60,10 @@ const TrafficMap: React.FC = () => {
         const trafficLayer = new window.google.maps.TrafficLayer();
         trafficLayer.setMap(map);
       } catch (err) {
-        console.error("Map initialization error:", err);
+        logger.error("Map initialization error", err, {
+          component: 'TrafficMap',
+          function: 'loadMap',
+        });
         setError("Error initializing map interface.");
       }
     };

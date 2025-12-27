@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vision Traffic Sync - UI/UX Component Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      @keyframes spin-slow {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes countdown {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 3s linear infinite;
+      }
+      .animate-countdown {
+        animation: countdown 1s ease-in-out infinite;
+      }
+      .animate-shimmer {
+        animation: shimmer 2s ease-in-out infinite;
+      }
+      .component-section {
+        scroll-margin-top: 80px;
+      }
+      .code-block {
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+      }
+      .editable {
+        border: 2px dashed transparent;
+        transition: all 0.2s;
+      }
+      .editable:hover {
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.05);
+      }
+      .editable:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-zinc-950 text-zinc-100">
+    <!-- Navigation Header -->
+    <nav
+      class="fixed top-0 left-0 right-0 bg-zinc-900 border-b border-zinc-800 z-50 shadow-lg"
+    >
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg">
+              <svg
+                class="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold">UI/UX Component Guide</h1>
+              <p class="text-zinc-500 text-sm">Vision Traffic Sync v2.0</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button
+              onclick="toggleEditMode()"
+              class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition-colors"
+            >
+              <span id="editModeText">Enable Edit Mode</span>
+            </button>
+            <button
+              onclick="resetAll()"
+              class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
+            >
+              Reset All
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside
+      class="fixed left-0 top-20 bottom-0 w-64 bg-zinc-900 border-r border-zinc-800 overflow-y-auto p-4"
+    >
+      <h2
+        class="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4"
+      >
+        Components
+      </h2>
+      <nav class="space-y-1">
+        <a
+          href="#landing-page"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Landing Page</a
+        >
+        <a
+          href="#dashboard"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Dashboard</a
+        >
+        <a
+          href="#login"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Login Page</a
+        >
+        <a
+          href="#system-status"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >System Status</a
+        >
+        <a
+          href="#emergency-control"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Emergency Control</a
+        >
+        <a
+          href="#lane-card"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Lane Card</a
+        >
+        <a
+          href="#lane-grid"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Lane Grid</a
+        >
+        <a
+          href="#error-boundary"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Error Boundary</a
+        >
+        <a
+          href="#protected-route"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Protected Route</a
+        >
+        <a
+          href="#animations"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Animations & Interactions</a
+        >
+        <a
+          href="#design-system"
+          class="block px-3 py-2 rounded-lg hover:bg-zinc-800 text-sm transition-colors"
+          >Design System</a
+        >
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 pt-20 p-8">
+      <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Landing Page Section -->
+        <section id="landing-page" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Landing Page</h2>
+            <p class="text-zinc-400">
+              Modern hero section with animated background and interactive
+              elements
+            </p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div
+              class="relative min-h-[600px] flex flex-col items-center justify-center overflow-hidden bg-zinc-950 rounded-lg"
+            >
+              <!-- Animated Grid Background -->
+              <div
+                class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+              ></div>
+
+              <!-- Hero Content -->
+              <div class="relative z-10 text-center px-6">
+                <div class="inline-flex items-center justify-center mb-8">
+                  <div class="relative">
+                    <div
+                      class="absolute inset-0 bg-blue-600 rounded-2xl blur-xl opacity-50 animate-pulse"
+                    ></div>
+                    <div
+                      class="relative bg-gradient-to-br from-blue-600 to-purple-600 p-4 rounded-2xl shadow-2xl"
+                    >
+                      <svg
+                        class="w-10 h-10 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13 10V3L4 14h7v7l9-11h-7z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <h1
+                  class="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent"
+                >
+                  Vision Traffic Sync
+                </h1>
+
+                <p class="text-2xl md:text-3xl text-zinc-400 mb-4 font-light">
+                  AI-Powered Intersection Management
+                </p>
+
+                <p class="text-lg text-zinc-500 max-w-2xl mx-auto mb-12">
+                  Revolutionize urban traffic flow with intelligent signal
+                  coordination
+                </p>
+
+                <!-- CTA Buttons -->
+                <div
+                  class="flex flex-col sm:flex-row gap-4 justify-center items-center"
+                >
+                  <button
+                    class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-semibold text-lg overflow-hidden transform hover:scale-105 transition-all duration-300 shadow-lg shadow-blue-500/50"
+                  >
+                    <span class="relative z-10 flex items-center gap-2">
+                      Get Started
+                      <svg
+                        class="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        ></path>
+                      </svg>
+                    </span>
+                    <div
+                      class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    ></div>
+                  </button>
+
+                  <button
+                    class="group px-8 py-4 bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl font-semibold text-lg hover:bg-zinc-800/50 transition-all duration-300 hover:border-zinc-700"
+                  >
+                    View System Status
+                  </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div
+                  class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mt-16"
+                >
+                  <div
+                    class="group bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:scale-105"
+                  >
+                    <div class="flex flex-col items-center gap-3">
+                      <div
+                        class="p-3 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg group-hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          class="w-6 h-6 text-blue-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div
+                        class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                      >
+                        99.9%
+                      </div>
+                      <div
+                        class="text-sm text-zinc-500 uppercase tracking-wider"
+                      >
+                        Uptime
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="group bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:scale-105"
+                  >
+                    <div class="flex flex-col items-center gap-3">
+                      <div
+                        class="p-3 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg group-hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          class="w-6 h-6 text-blue-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div
+                        class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                      >
+                        &lt;1s
+                      </div>
+                      <div
+                        class="text-sm text-zinc-500 uppercase tracking-wider"
+                      >
+                        Response
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="group bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:scale-105"
+                  >
+                    <div class="flex flex-col items-center gap-3">
+                      <div
+                        class="p-3 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg group-hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          class="w-6 h-6 text-blue-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div
+                        class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                      >
+                        24/7
+                      </div>
+                      <div
+                        class="text-sm text-zinc-500 uppercase tracking-wider"
+                      >
+                        Monitoring
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="group bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:scale-105"
+                  >
+                    <div class="flex flex-col items-center gap-3">
+                      <div
+                        class="p-3 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg group-hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          class="w-6 h-6 text-blue-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div
+                        class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                      >
+                        AI
+                      </div>
+                      <div
+                        class="text-sm text-zinc-500 uppercase tracking-wider"
+                      >
+                        Powered
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Dashboard Page</h2>
+            <p class="text-zinc-400">
+              Main dashboard with header, navigation, and traffic feeds
+            </p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <!-- Dashboard Header -->
+            <header
+              class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 pb-6 border-b border-zinc-800"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-900/20"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h1 class="text-2xl font-bold tracking-tight">
+                    Vision Traffic Sync
+                  </h1>
+                  <p class="text-zinc-500 text-sm">
+                    AI-Powered Intersection Management System
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <!-- Navigation Tabs -->
+                <div
+                  class="bg-zinc-900 rounded-lg p-1 border border-zinc-800 flex mr-4"
+                >
+                  <button
+                    class="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 bg-zinc-800 text-white shadow-sm"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      ></path>
+                    </svg>
+                    Dashboard
+                  </button>
+                  <button
+                    class="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 text-zinc-400 hover:text-white"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      ></path>
+                    </svg>
+                    System Status
+                  </button>
+                </div>
+
+                <!-- Connection Status -->
+                <div
+                  class="flex items-center gap-4 bg-zinc-900 py-2 px-4 rounded-full border border-zinc-800"
+                >
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-2 h-2 rounded-full bg-green-500 animate-pulse"
+                    ></div>
+                    <span
+                      class="text-sm font-medium text-zinc-300 uppercase tracking-wide"
+                      >Live Sync</span
+                    >
+                  </div>
+                  <div class="h-4 w-px bg-zinc-800"></div>
+                  <svg
+                    class="w-4 h-4 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </header>
+
+            <!-- Footer -->
+            <footer
+              class="mt-12 text-center text-zinc-600 text-sm py-6 border-t border-zinc-900"
+            >
+              <p>Vision Traffic Sync v2.0 • Powered by Gemini AI & n8n</p>
+            </footer>
+          </div>
+        </section>
+
+        <!-- Login Page Section -->
+        <section id="login" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Login Page</h2>
+            <p class="text-zinc-400">
+              Authentication form with email and password fields
+            </p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
+            <div
+              class="min-h-[500px] bg-zinc-950 flex items-center justify-center p-4"
+            >
+              <div
+                class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 w-full max-w-md shadow-2xl"
+              >
+                <div class="text-center mb-8">
+                  <h1 class="text-3xl font-bold text-white mb-2">
+                    Traffic Control
+                  </h1>
+                  <p class="text-zinc-500">Authorized Operator Access Only</p>
+                </div>
+
+                <form class="space-y-6">
+                  <div>
+                    <label class="block text-zinc-400 text-sm font-medium mb-2"
+                      >Operator ID</label
+                    >
+                    <div class="relative">
+                      <svg
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        ></path>
+                      </svg>
+                      <input
+                        type="email"
+                        class="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-2.5 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                        placeholder="operator@traffic.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-zinc-400 text-sm font-medium mb-2"
+                      >Password</label
+                    >
+                    <div class="relative">
+                      <svg
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        ></path>
+                      </svg>
+                      <input
+                        type="password"
+                        class="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-2.5 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+                  >
+                    Access Dashboard
+                  </button>
+                </form>
+
+                <div class="mt-6 text-center text-xs text-zinc-600">
+                  <p>Restricted System • Activity Monitored</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- System Status Section -->
+        <section id="system-status" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">System Status Page</h2>
+            <p class="text-zinc-400">System health monitoring dashboard</p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Firestore Card -->
+              <div
+                class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-lg"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-orange-900/30 p-2 rounded-lg text-orange-400"
+                    >
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+                        ></path>
+                      </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg">Firebase Firestore</h3>
+                  </div>
+                  <div
+                    class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold uppercase"
+                  >
+                    connected
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Latency</span>
+                    <span class="font-mono">24ms</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Reads/min</span>
+                    <span class="font-mono">142</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Writes/min</span>
+                    <span class="font-mono">45</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- n8n Card -->
+              <div
+                class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-lg"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="bg-blue-900/30 p-2 rounded-lg text-blue-400">
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+                        ></path>
+                      </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg">n8n Workflow Engine</h3>
+                  </div>
+                  <div
+                    class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold uppercase"
+                  >
+                    Configured
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Webhook Endpoint</span>
+                    <span class="font-mono text-xs truncate max-w-[150px]"
+                      >Configured</span
+                    >
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Uptime</span>
+                    <span class="font-mono">99.9%</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Active Workflows</span>
+                    <span class="font-mono">1</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gemini AI Card -->
+              <div
+                class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-lg"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-purple-900/30 p-2 rounded-lg text-purple-400"
+                    >
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg">Gemini 1.5 Flash</h3>
+                  </div>
+                  <div
+                    class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold uppercase"
+                  >
+                    Operational
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Model Version</span>
+                    <span class="font-mono">gemini-1.5-flash</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Avg. Processing Time</span>
+                    <span class="font-mono">1.2s</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Daily Quota</span>
+                    <span class="font-mono">15% Used</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Emergency Control Section -->
+        <section id="emergency-control" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Emergency Control</h2>
+            <p class="text-zinc-400">
+              Emergency mode toggle with visual states
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Inactive State -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-lg font-semibold mb-4 text-zinc-400">
+                Inactive State
+              </h3>
+              <div
+                class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col items-center justify-center gap-4 shadow-xl"
+              >
+                <div class="flex items-center gap-3 text-zinc-400">
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    ></path>
+                  </svg>
+                  <h2 class="text-lg font-semibold uppercase tracking-wider">
+                    Emergency Control System
+                  </h2>
+                </div>
+
+                <button
+                  class="relative group w-full max-w-md py-6 px-8 rounded-xl font-bold text-2xl tracking-widest transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-4 border-2 bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700 hover:text-white hover:border-zinc-500"
+                >
+                  <svg
+                    class="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    ></path>
+                  </svg>
+                  ACTIVATE EMERGENCY
+                </button>
+              </div>
+            </div>
+
+            <!-- Active State -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-lg font-semibold mb-4 text-zinc-400">
+                Active State
+              </h3>
+              <div
+                class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col items-center justify-center gap-4 shadow-xl"
+              >
+                <div class="flex items-center gap-3 text-zinc-400">
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    ></path>
+                  </svg>
+                  <h2 class="text-lg font-semibold uppercase tracking-wider">
+                    Emergency Control System
+                  </h2>
+                </div>
+
+                <button
+                  class="relative group w-full max-w-md py-6 px-8 rounded-xl font-bold text-2xl tracking-widest transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-4 border-2 bg-red-600 border-red-500 text-white shadow-[0_0_40px_rgba(220,38,38,0.6)] animate-pulse"
+                >
+                  <svg
+                    class="w-8 h-8 animate-spin-slow"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    ></path>
+                  </svg>
+                  EMERGENCY ACTIVE
+                </button>
+
+                <div class="text-red-500 font-mono text-sm mt-2 animate-bounce">
+                  ⚠️ ALL SIGNALS OVERRIDDEN TO RED ⚠️
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lane Card Section -->
+        <section id="lane-card" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Lane Card</h2>
+            <p class="text-zinc-400">
+              Individual lane status with traffic light, timer, and upload
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Lane Card Example -->
+            <div
+              class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col gap-4 shadow-xl relative overflow-hidden"
+            >
+              <!-- Green Wave Indicator -->
+              <div
+                class="absolute top-0 right-0 bg-green-500/20 text-green-400 px-3 py-1 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-bl-xl border-l border-b border-green-500/30"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  ></path>
+                </svg>
+                Green Wave Active
+              </div>
+
+              <div class="flex justify-between items-center mt-2">
+                <h3
+                  class="text-xl font-bold text-white uppercase tracking-wider"
+                >
+                  Lane 1
+                </h3>
+              </div>
+
+              <!-- Stats Row -->
+              <div class="grid grid-cols-2 gap-3">
+                <div
+                  class="bg-zinc-950 rounded-lg p-3 border border-zinc-800 flex items-center gap-3"
+                >
+                  <div class="bg-blue-900/30 p-2 rounded-md text-blue-400">
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-zinc-500 text-xs font-medium uppercase">
+                      Vehicles
+                    </div>
+                    <div class="text-white font-mono text-lg font-bold">12</div>
+                  </div>
+                </div>
+                <div
+                  class="bg-zinc-950 rounded-lg p-3 border border-zinc-800 flex items-center gap-3"
+                >
+                  <div class="bg-purple-900/30 p-2 rounded-md text-purple-400">
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-zinc-500 text-xs font-medium uppercase">
+                      Density
+                    </div>
+                    <div class="text-white font-mono text-lg font-bold">
+                      MED
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Traffic Light Visual -->
+              <div class="flex justify-center my-2">
+                <div
+                  class="bg-zinc-950 p-4 rounded-full flex flex-col gap-4 border border-zinc-800 shadow-inner"
+                >
+                  <div
+                    class="w-12 h-12 rounded-full transition-all duration-300 bg-red-950/30 opacity-30"
+                  ></div>
+                  <div
+                    class="w-12 h-12 rounded-full transition-all duration-300 bg-yellow-950/30 opacity-30"
+                  ></div>
+                  <div
+                    class="w-12 h-12 rounded-full transition-all duration-300 bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.6)]"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Countdown Timer -->
+              <div class="text-center py-2">
+                <div
+                  class="text-6xl font-mono font-bold text-white tabular-nums tracking-tight"
+                >
+                  25
+                </div>
+                <div
+                  class="text-zinc-500 text-xs mt-1 font-medium tracking-wide"
+                >
+                  SECONDS REMAINING
+                </div>
+              </div>
+
+              <!-- Camera Feed Section -->
+              <div class="mt-auto pt-4 border-t border-zinc-800">
+                <div class="flex flex-col gap-3">
+                  <label
+                    class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-lg cursor-pointer transition-all duration-200 group bg-zinc-800 hover:bg-zinc-700 text-white hover:shadow-lg border border-transparent"
+                  >
+                    <svg
+                      class="w-4 h-4 group-hover:scale-110 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      ></path>
+                    </svg>
+                    <span class="text-sm font-medium">Upload Camera Feed</span>
+                  </label>
+                  <div class="text-center">
+                    <span
+                      class="text-[10px] text-zinc-600 uppercase tracking-widest"
+                      >Supports JPG/PNG/WEBP • Max 5MB</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lane Card with Emergency -->
+            <div
+              class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col gap-4 shadow-xl relative overflow-hidden"
+            >
+              <div class="flex justify-between items-center mt-2">
+                <h3
+                  class="text-xl font-bold text-white uppercase tracking-wider"
+                >
+                  Lane 2
+                </h3>
+                <div
+                  class="flex items-center gap-2 text-red-500 animate-pulse bg-red-950/30 px-3 py-1 rounded-full border border-red-900/50"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    ></path>
+                  </svg>
+                  <span class="text-xs font-bold">EMERGENCY</span>
+                </div>
+              </div>
+
+              <!-- Stats Row -->
+              <div class="grid grid-cols-2 gap-3">
+                <div
+                  class="bg-zinc-950 rounded-lg p-3 border border-zinc-800 flex items-center gap-3"
+                >
+                  <div class="bg-blue-900/30 p-2 rounded-md text-blue-400">
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-zinc-500 text-xs font-medium uppercase">
+                      Vehicles
+                    </div>
+                    <div class="text-white font-mono text-lg font-bold">18</div>
+                  </div>
+                </div>
+                <div
+                  class="bg-zinc-950 rounded-lg p-3 border border-zinc-800 flex items-center gap-3"
+                >
+                  <div class="bg-purple-900/30 p-2 rounded-md text-purple-400">
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-zinc-500 text-xs font-medium uppercase">
+                      Density
+                    </div>
+                    <div class="text-white font-mono text-lg font-bold">
+                      HIGH
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Traffic Light Visual (Red) -->
+              <div class="flex justify-center my-2">
+                <div
+                  class="bg-zinc-950 p-4 rounded-full flex flex-col gap-4 border border-zinc-800 shadow-inner"
+                >
+                  <div
+                    class="w-12 h-12 rounded-full transition-all duration-300 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)]"
+                  ></div>
+                  <div
+                    class="w-12 h-12 rounded-full transition-all duration-300 bg-yellow-950/30 opacity-30"
+                  ></div>
+                  <div
+                    class="w-12 h-12 rounded-full transition-all duration-300 bg-green-950/30 opacity-30"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Countdown Timer -->
+              <div class="text-center py-2">
+                <div
+                  class="text-6xl font-mono font-bold text-white tabular-nums tracking-tight"
+                >
+                  08
+                </div>
+                <div
+                  class="text-zinc-500 text-xs mt-1 font-medium tracking-wide"
+                >
+                  SECONDS REMAINING
+                </div>
+              </div>
+
+              <!-- Camera Feed Section -->
+              <div class="mt-auto pt-4 border-t border-zinc-800">
+                <div class="flex flex-col gap-3">
+                  <label
+                    class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-lg cursor-pointer transition-all duration-200 group bg-zinc-800 hover:bg-zinc-700 text-white hover:shadow-lg border border-transparent"
+                  >
+                    <svg
+                      class="w-4 h-4 group-hover:scale-110 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      ></path>
+                    </svg>
+                    <span class="text-sm font-medium">Upload Camera Feed</span>
+                  </label>
+                  <div class="text-center">
+                    <span
+                      class="text-[10px] text-zinc-600 uppercase tracking-widest"
+                      >Supports JPG/PNG/WEBP • Max 5MB</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lane Grid Section -->
+        <section id="lane-grid" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Lane Grid</h2>
+            <p class="text-zinc-400">
+              Responsive grid layout for multiple lane cards
+            </p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto"
+            >
+              <div
+                class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col items-center justify-center h-full shadow-xl"
+              >
+                <div class="text-zinc-600">Lane Card 1</div>
+              </div>
+              <div
+                class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col items-center justify-center h-full shadow-xl"
+              >
+                <div class="text-zinc-600">Lane Card 2</div>
+              </div>
+              <div
+                class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col items-center justify-center h-full shadow-xl"
+              >
+                <div class="text-zinc-600">Lane Card 3</div>
+              </div>
+              <div
+                class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col items-center justify-center h-full shadow-xl"
+              >
+                <div class="text-zinc-600">Lane Card 4</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Error Boundary Section -->
+        <section id="error-boundary" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Error Boundary</h2>
+            <p class="text-zinc-400">Error handling UI with recovery options</p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div
+              class="min-h-[400px] bg-zinc-950 flex items-center justify-center p-6"
+            >
+              <div
+                class="max-w-2xl w-full bg-zinc-900 border border-red-800 rounded-xl p-8 shadow-xl"
+              >
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="bg-red-900/30 p-3 rounded-lg">
+                    <svg
+                      class="w-8 h-8 text-red-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 class="text-2xl font-bold text-red-400">
+                      Something went wrong
+                    </h1>
+                    <p class="text-zinc-400 text-sm mt-1">
+                      An unexpected error occurred
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mb-6">
+                  <h2 class="text-lg font-semibold text-zinc-300 mb-2">
+                    Error Details
+                  </h2>
+                  <div
+                    class="bg-zinc-950 rounded-lg p-4 border border-zinc-800"
+                  >
+                    <p class="text-red-400 font-mono text-sm break-words">
+                      Error: Component failed to render
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <button
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Protected Route Section -->
+        <section id="protected-route" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Protected Route</h2>
+            <p class="text-zinc-400">Loading state for route protection</p>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div
+              class="min-h-[300px] bg-zinc-950 flex items-center justify-center text-white"
+            >
+              <div class="flex flex-col items-center gap-4">
+                <div
+                  class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+                ></div>
+                <p class="text-zinc-500 text-sm">Initializing System...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Animations & Interactions Section -->
+        <section id="animations" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Animations & Interactions</h2>
+            <p class="text-zinc-400">
+              Micro-animations, transitions, and interactive elements
+            </p>
+          </div>
+
+          <div class="space-y-8">
+            <!-- Hover Effects -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Hover Effects</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div
+                  class="group bg-zinc-800 rounded-lg p-6 border border-zinc-700 hover:border-blue-500 hover:scale-105 transition-all duration-300 cursor-pointer"
+                >
+                  <h4
+                    class="font-semibold mb-2 group-hover:text-blue-400 transition-colors"
+                  >
+                    Scale on Hover
+                  </h4>
+                  <p class="text-sm text-zinc-400">
+                    Cards scale up (1.02x - 1.05x) with border color change
+                  </p>
+                </div>
+                <div
+                  class="group bg-zinc-800 rounded-lg p-6 border border-zinc-700 hover:bg-zinc-700 transition-all duration-300 cursor-pointer"
+                >
+                  <h4
+                    class="font-semibold mb-2 group-hover:text-purple-400 transition-colors"
+                  >
+                    Background Shift
+                  </h4>
+                  <p class="text-sm text-zinc-400">
+                    Smooth background color transitions on hover
+                  </p>
+                </div>
+                <div
+                  class="group bg-zinc-800 rounded-lg p-6 border border-zinc-700 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer"
+                >
+                  <h4
+                    class="font-semibold mb-2 group-hover:text-green-400 transition-colors"
+                  >
+                    Shadow Glow
+                  </h4>
+                  <p class="text-sm text-zinc-400">
+                    Glowing shadow effects with color matching
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Click Interactions -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Click Interactions</h3>
+              <div class="space-y-4">
+                <div class="flex items-center gap-4">
+                  <button
+                    class="px-6 py-3 bg-blue-600 rounded-lg font-medium hover:bg-blue-700 active:scale-95 transition-all duration-200"
+                  >
+                    Ripple Effect
+                  </button>
+                  <p class="text-sm text-zinc-400">
+                    Ripple animation on button click with scale feedback
+                  </p>
+                </div>
+                <div class="flex items-center gap-4">
+                  <button
+                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg font-medium hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg"
+                  >
+                    Gradient Button
+                  </button>
+                  <p class="text-sm text-zinc-400">
+                    Gradient buttons with hover overlay effects
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading States -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Loading States</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div
+                  class="bg-zinc-800 rounded-lg p-6 flex flex-col items-center gap-4"
+                >
+                  <div
+                    class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+                  ></div>
+                  <p class="text-sm text-zinc-400">Spinner Animation</p>
+                </div>
+                <div
+                  class="bg-zinc-800 rounded-lg p-6 flex flex-col items-center gap-4"
+                >
+                  <div
+                    class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"
+                    style="animation-duration: 0.8s"
+                  ></div>
+                  <p class="text-sm text-zinc-400">Fast Spinner</p>
+                </div>
+                <div
+                  class="bg-zinc-800 rounded-lg p-6 flex flex-col items-center gap-4"
+                >
+                  <div
+                    class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                  ></div>
+                  <p class="text-sm text-zinc-400">Pulse Indicator</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Micro-Animations -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Micro-Animations</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="font-semibold mb-3">Traffic Light Pulse</h4>
+                  <div class="bg-zinc-800 rounded-lg p-6 flex justify-center">
+                    <div
+                      class="w-16 h-16 bg-red-600 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.8)] animate-pulse relative"
+                    >
+                      <div
+                        class="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75"
+                      ></div>
+                    </div>
+                  </div>
+                  <p class="text-sm text-zinc-400 mt-2">
+                    Active traffic lights pulse with glow and ping effects
+                  </p>
+                </div>
+                <div>
+                  <h4 class="font-semibold mb-3">Timer Countdown</h4>
+                  <div class="bg-zinc-800 rounded-lg p-6 flex justify-center">
+                    <div
+                      class="text-6xl font-mono font-bold text-white animate-countdown"
+                    >
+                      25
+                    </div>
+                  </div>
+                  <p class="text-sm text-zinc-400 mt-2">
+                    Timer numbers animate with subtle scale on change
+                  </p>
+                </div>
+                <div>
+                  <h4 class="font-semibold mb-3">Icon Rotations</h4>
+                  <div
+                    class="bg-zinc-800 rounded-lg p-6 flex justify-center gap-4"
+                  >
+                    <svg
+                      class="w-8 h-8 text-blue-400 animate-spin-slow"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      ></path>
+                    </svg>
+                    <svg
+                      class="w-8 h-8 text-purple-400 group-hover:rotate-12 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      ></path>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-zinc-400 mt-2">
+                    Icons rotate and scale on hover/active states
+                  </p>
+                </div>
+                <div>
+                  <h4 class="font-semibold mb-3">Shimmer Effect</h4>
+                  <div
+                    class="bg-zinc-800 rounded-lg p-6 relative overflow-hidden"
+                  >
+                    <div
+                      class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
+                    ></div>
+                    <div class="relative z-10 text-center py-4">
+                      Hover to see shimmer
+                    </div>
+                  </div>
+                  <p class="text-sm text-zinc-400 mt-2">
+                    Shimmer overlay on buttons and cards
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page Transitions -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Page Transitions</h3>
+              <div class="space-y-4">
+                <div class="bg-zinc-800 rounded-lg p-4">
+                  <h4 class="font-semibold mb-2">Fade In</h4>
+                  <p class="text-sm text-zinc-400">
+                    Elements fade in on page load (opacity 0 → 1)
+                  </p>
+                </div>
+                <div class="bg-zinc-800 rounded-lg p-4">
+                  <h4 class="font-semibold mb-2">Slide Up</h4>
+                  <p class="text-sm text-zinc-400">
+                    Elements slide up with fade (translateY + opacity)
+                  </p>
+                </div>
+                <div class="bg-zinc-800 rounded-lg p-4">
+                  <h4 class="font-semibold mb-2">Staggered Animation</h4>
+                  <p class="text-sm text-zinc-400">
+                    Multiple elements animate with delay (100ms increments)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Glassmorphism -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Glassmorphism Effects</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  class="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-6"
+                >
+                  <h4 class="font-semibold mb-2">Backdrop Blur</h4>
+                  <p class="text-sm text-zinc-400">
+                    backdrop-blur-sm for frosted glass effect
+                  </p>
+                </div>
+                <div
+                  class="bg-zinc-800/80 backdrop-blur-sm border border-zinc-700 rounded-xl p-6"
+                >
+                  <h4 class="font-semibold mb-2">Semi-Transparent</h4>
+                  <p class="text-sm text-zinc-400">
+                    Opacity 50-80% with blur for depth
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Design System Section -->
+        <section id="design-system" class="component-section">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold mb-2">Design System</h2>
+            <p class="text-zinc-400">
+              Colors, typography, and spacing guidelines
+            </p>
+          </div>
+
+          <div class="space-y-8">
+            <!-- Colors -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Color Palette</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div class="h-20 bg-blue-600 rounded-lg mb-2"></div>
+                  <p class="text-sm font-medium">Blue-600</p>
+                  <p class="text-xs text-zinc-500">Primary Actions</p>
+                </div>
+                <div>
+                  <div class="h-20 bg-red-600 rounded-lg mb-2"></div>
+                  <p class="text-sm font-medium">Red-600</p>
+                  <p class="text-xs text-zinc-500">Emergency/Errors</p>
+                </div>
+                <div>
+                  <div class="h-20 bg-green-500 rounded-lg mb-2"></div>
+                  <p class="text-sm font-medium">Green-500</p>
+                  <p class="text-xs text-zinc-500">Success/Active</p>
+                </div>
+                <div>
+                  <div class="h-20 bg-yellow-500 rounded-lg mb-2"></div>
+                  <p class="text-sm font-medium">Yellow-500</p>
+                  <p class="text-xs text-zinc-500">Warning</p>
+                </div>
+                <div>
+                  <div
+                    class="h-20 bg-zinc-950 rounded-lg mb-2 border border-zinc-800"
+                  ></div>
+                  <p class="text-sm font-medium">Zinc-950</p>
+                  <p class="text-xs text-zinc-500">Background</p>
+                </div>
+                <div>
+                  <div
+                    class="h-20 bg-zinc-900 rounded-lg mb-2 border border-zinc-800"
+                  ></div>
+                  <p class="text-sm font-medium">Zinc-900</p>
+                  <p class="text-xs text-zinc-500">Cards</p>
+                </div>
+                <div>
+                  <div
+                    class="h-20 bg-zinc-800 rounded-lg mb-2 border border-zinc-800"
+                  ></div>
+                  <p class="text-sm font-medium">Zinc-800</p>
+                  <p class="text-xs text-zinc-500">Borders</p>
+                </div>
+                <div>
+                  <div class="h-20 bg-purple-500 rounded-lg mb-2"></div>
+                  <p class="text-sm font-medium">Purple-500</p>
+                  <p class="text-xs text-zinc-500">Accents</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Typography -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Typography</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-6xl font-bold mb-2">6xl - Timer Display</p>
+                  <p class="text-xs text-zinc-500">font-mono, font-bold</p>
+                </div>
+                <div>
+                  <p class="text-3xl font-bold mb-2">3xl - Page Titles</p>
+                  <p class="text-xs text-zinc-500">font-bold</p>
+                </div>
+                <div>
+                  <p class="text-2xl font-bold mb-2">2xl - Section Headers</p>
+                  <p class="text-xs text-zinc-500">font-bold</p>
+                </div>
+                <div>
+                  <p class="text-xl font-bold mb-2">xl - Card Titles</p>
+                  <p class="text-xs text-zinc-500">font-bold</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium mb-2">sm - Labels, Metadata</p>
+                  <p class="text-xs text-zinc-500">font-medium</p>
+                </div>
+                <div>
+                  <p class="text-xs font-medium mb-2">xs - Small Labels</p>
+                  <p class="text-xs text-zinc-500">font-medium</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spacing -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4">Spacing Scale</h3>
+              <div class="space-y-3">
+                <div class="flex items-center gap-4">
+                  <div class="w-2 h-2 bg-blue-500 rounded"></div>
+                  <span class="text-sm">p-2 / gap-2 - Minimal</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                  <span class="text-sm">p-3 / gap-3 - Small</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="w-6 h-6 bg-blue-500 rounded"></div>
+                  <span class="text-sm">p-4 / gap-4 - Medium</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="w-8 h-8 bg-blue-500 rounded"></div>
+                  <span class="text-sm">p-6 / gap-6 - Large</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 bg-blue-500 rounded"></div>
+                  <span class="text-sm">p-8 / mb-8 - Extra Large</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      let editMode = false;
+
+      function toggleEditMode() {
+        editMode = !editMode;
+        const text = document.getElementById("editModeText");
+        text.textContent = editMode ? "Disable Edit Mode" : "Enable Edit Mode";
+
+        // Add editable class to all interactive elements
+        const elements = document.querySelectorAll(
+          ".bg-zinc-900, .bg-zinc-800, button, input, .text-white, .text-zinc-400"
+        );
+        elements.forEach((el) => {
+          if (editMode) {
+            el.classList.add("editable");
+            el.contentEditable = true;
+          } else {
+            el.classList.remove("editable");
+            el.contentEditable = false;
+          }
+        });
+      }
+
+      function resetAll() {
+        if (confirm("Reset all changes? This will reload the page.")) {
+          location.reload();
+        }
+      }
+
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+
+      // Initialize Lucide icons
+      if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+      }
+    </script>
+  </body>
+</html>

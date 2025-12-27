@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { LaneStatus } from "../types";
+import { logger } from "../utils/logger";
 
 /**
  * Get Gemini AI instance
@@ -8,12 +9,18 @@ function getGeminiAI(): GoogleGenAI | null {
   try {
     const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.warn("Gemini API key not found. Falling back to rule-based logic.");
+      logger.warn("Gemini API key not found. Falling back to rule-based logic.", {
+        component: 'aiTrafficService',
+        function: 'getGeminiAI',
+      });
       return null;
     }
     return new GoogleGenAI({ apiKey });
   } catch (error) {
-    console.error("Failed to initialize Gemini AI:", error);
+    logger.error("Failed to initialize Gemini AI", error, {
+      component: 'aiTrafficService',
+      function: 'getGeminiAI',
+    });
     return null;
   }
 }
@@ -67,7 +74,10 @@ Keep the response concise (2-3 sentences max), professional, and focused on prac
 
     return text.trim();
   } catch (error) {
-    console.error("AI traffic insight generation failed:", error);
+    logger.error("AI traffic insight generation failed", error, {
+      component: 'aiTrafficService',
+      function: 'generateAITrafficInsight',
+    });
     return null;
   }
 }
@@ -132,7 +142,10 @@ Respond with ONLY the route name (e.g., "Hitech City Main Rd" or "Gachibowli Fly
     
     return matchedRoute || null;
   } catch (error) {
-    console.error("AI route calculation failed:", error);
+    logger.error("AI route calculation failed", error, {
+      component: 'aiTrafficService',
+      function: 'calculateAIBestRoute',
+    });
     return null;
   }
 }

@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SingleLaneAnalysisResult, LaneStatus, LaneId } from "../types";
 import { TRAFFIC_CONFIG, calculateGreenTime } from "../config/trafficConfig";
+import { logger } from "../utils/logger";
 
 const SYSTEM_INSTRUCTION = `
 You are an advanced Traffic Control AI Agent monitoring a single lane feed.
@@ -67,7 +68,10 @@ export const analyzeLaneImage = async (base64Image: string, laneLabel: string): 
     };
 
   } catch (error) {
-    console.error("Lane analysis failed:", error);
+    logger.error("Lane analysis failed", error, {
+      component: 'trafficService',
+      function: 'analyzeLaneImage',
+    });
     throw error;
   }
 };

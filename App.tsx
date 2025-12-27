@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LaneId } from './types';
 import ControlPanel from './components/ControlPanel';
 import { AppHeader } from './components/AppHeader';
@@ -9,6 +9,7 @@ import { useTrafficCycle } from './hooks/useTrafficCycle';
 import { useTrafficLogs } from './hooks/useTrafficLogs';
 import { useRouteInsights } from './hooks/useRouteInsights';
 import { createTrafficHandlers } from './utils/trafficHandlers';
+import { initFirebase } from './services/firebaseConfig';
 
 function App() {
   const [lanes, setLanes] = useState(INITIAL_LANES);
@@ -26,6 +27,16 @@ function App() {
   const addLog = (message: string) => {
     setLogs(prev => [message, ...prev]);
   };
+
+  // Initialize Firebase on app startup
+  useEffect(() => {
+    const firebase = initFirebase();
+    if (firebase) {
+      addLog('✅ Firebase connected. Incident reports will be saved to database.');
+    } else {
+      addLog('⚠️ Firebase not configured. Running in demo mode (reports logged locally only).');
+    }
+  }, []);
 
   // Use custom hooks for traffic logic
   useTrafficSimulation(lanes, setLanes);

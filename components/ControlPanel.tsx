@@ -1,6 +1,7 @@
 import React from 'react';
 import { Activity, Zap, Plus, Trash2, Siren, Sliders, Monitor, AlertTriangle, User } from 'lucide-react';
 import { LaneId, LaneStatus } from '../types';
+import { IncidentType } from '../types/incident';
 import { LANE_CONFIG } from '../config/trafficConfig';
 
 interface ControlPanelProps {
@@ -10,7 +11,7 @@ interface ControlPanelProps {
   onAddTraffic: (amount: number) => void;
   onClearLane: () => void;
   onToggleEmergency: () => void;
-  onReportIncident: (type: string) => void;
+  onReportIncident: (type: IncidentType) => void | Promise<void>;
   lanes: LaneStatus[];
 }
 
@@ -101,14 +102,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button 
-              onClick={() => onReportIncident('Accident')}
+              onClick={async () => await onReportIncident('Accident')}
               className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 hover:bg-red-900/20 border border-slate-700 hover:border-red-500/50 rounded-lg transition-colors group"
             >
               <AlertTriangle className="w-4 h-4 text-red-500" />
               <span className="text-xs font-medium text-slate-400 group-hover:text-red-200">Accident</span>
             </button>
              <button 
-              onClick={() => onReportIncident('Pothole / Road Work')}
+              onClick={async () => await onReportIncident('Pothole / Road Work')}
               className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 hover:bg-amber-900/20 border border-slate-700 hover:border-amber-500/50 rounded-lg transition-colors group"
             >
               <Activity className="w-4 h-4 text-amber-500" />
