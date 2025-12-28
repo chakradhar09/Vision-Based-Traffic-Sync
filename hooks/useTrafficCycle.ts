@@ -18,12 +18,22 @@ export function useTrafficCycle(
 
         // Emergency priority handling
         if (emergencyLane) {
-          // Ensure emergency lane is green
+          // Ensure emergency lane is green and all other lanes are red
           if (emergencyLane.status !== 'green') {
             return prevLanes.map(l => ({
               ...l,
               status: l.id === emergencyLane.id ? 'green' : 'red',
               timer: l.id === emergencyLane.id ? TRAFFIC_CONFIG.EMERGENCY_GREEN_TIME : 0
+            }));
+          }
+          
+          // Ensure all non-emergency lanes are red during emergency
+          const hasNonEmergencyGreen = prevLanes.some(l => l.id !== emergencyLane.id && l.status === 'green');
+          if (hasNonEmergencyGreen) {
+            return prevLanes.map(l => ({
+              ...l,
+              status: l.id === emergencyLane.id ? 'green' : 'red',
+              timer: l.id === emergencyLane.id ? l.timer : 0
             }));
           }
           
@@ -33,7 +43,7 @@ export function useTrafficCycle(
             // This ensures the timer stays at 10 for the full 10-second stop duration
             // Don't decrement - just keep it at 10 while ambulance is stopped at front
             return prevLanes.map(l =>
-              l.id === emergencyLane.id ? { ...l, timer: 10 } : l
+              l.id === emergencyLane.id ? { ...l, timer: 10 } : { ...l, status: 'red', timer: 0 }
             );
           }
           
@@ -42,7 +52,9 @@ export function useTrafficCycle(
           // But ensure we don't go below 0
           if (emergencyLane.timer > 0) {
             return prevLanes.map(l =>
-              l.id === emergencyLane.id ? { ...l, timer: Math.max(0, l.timer - TRAFFIC_CONFIG.TIMER_REDUCTION_RATE) } : l
+              l.id === emergencyLane.id 
+                ? { ...l, timer: Math.max(0, l.timer - TRAFFIC_CONFIG.TIMER_REDUCTION_RATE) }
+                : { ...l, status: 'red', timer: 0 }
             );
           }
           
@@ -60,6 +72,7 @@ export function useTrafficCycle(
           });
         }
 
+        // Normal cycle logic - only run if no emergency is active
         // If no green signal, assign to busiest lane
         if (!currentGreen) {
           const busiest = [...prevLanes].sort((a, b) => b.vehicleCount - a.vehicleCount)[0];

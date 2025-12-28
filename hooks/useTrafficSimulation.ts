@@ -21,19 +21,26 @@ export function useTrafficSimulation(
           let timer = lane.timer;
 
           if (lane.status === 'green') {
-            // Calculate outflow when green
-            const outflow = Math.floor(
-              Math.random() * (TRAFFIC_CONFIG.OUTFLOW_MAX - TRAFFIC_CONFIG.OUTFLOW_MIN + 1)
-            ) + TRAFFIC_CONFIG.OUTFLOW_MIN;
-            
-            // Don't clear emergency here - let useTrafficCycle handle it based on timer
-            // Emergency should persist for the full timer duration set in useTrafficCycle
+            // If ambulance is stopped at front, prevent outflow
+            // This ensures the ambulance stays in the queue for the full 10-second stop duration
+            if (lane.isEmergency && lane.ambulanceAtFront) {
+              // Don't reduce vehicle count - keep ambulance at front
+              newCount = lane.vehicleCount;
+            } else {
+              // Normal outflow logic
+              const outflow = Math.floor(
+                Math.random() * (TRAFFIC_CONFIG.OUTFLOW_MAX - TRAFFIC_CONFIG.OUTFLOW_MIN + 1)
+              ) + TRAFFIC_CONFIG.OUTFLOW_MIN;
+              
+              // Don't clear emergency here - let useTrafficCycle handle it based on timer
+              // Emergency should persist for the full timer duration set in useTrafficCycle
 
-            newCount = Math.max(TRAFFIC_CONFIG.MIN_VEHICLE_COUNT, newCount - outflow);
-            
-            // Occasionally add a vehicle even on green
-            if (!isEmergency && Math.random() > TRAFFIC_CONFIG.ADDITIONAL_VEHICLE_PROBABILITY) {
-              newCount += 1;
+              newCount = Math.max(TRAFFIC_CONFIG.MIN_VEHICLE_COUNT, newCount - outflow);
+              
+              // Occasionally add a vehicle even on green
+              if (!isEmergency && Math.random() > TRAFFIC_CONFIG.ADDITIONAL_VEHICLE_PROBABILITY) {
+                newCount += 1;
+              }
             }
           } else {
             // Add vehicles when red (inflow)

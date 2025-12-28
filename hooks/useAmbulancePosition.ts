@@ -25,18 +25,19 @@ export function useAmbulancePosition(
           const now = Date.now();
           const AMBULANCE_STOP_DURATION = 10000; // 10 seconds
           
-          // Check if ambulance is at front (index 0) and still within stop duration
+          // Check if ambulance is at front (index 0)
           // Ambulance is at front if:
-          // 1. Ambulance exists
-          // 2. Ambulance is at index 0 (front of queue)
-          // 3. Ambulance has stoppedAtFront timestamp set (meaning it reached front)
-          // 4. Still within the 10-second stop duration
+          // 1. Emergency is active
+          // 2. Ambulance exists
+          // 3. Ambulance is at index 0 (front of queue)
+          // 4. If stoppedAtFront is set, check if still within 10-second stop duration
+          //    If not set yet, still consider it at front (will be set by useVisualCars)
           const ambulanceAtFront = lane.isEmergency && // Only check if emergency is active
                                    ambulance !== undefined && 
-                                   ambulance.index === 0 && 
-                                   ambulance.stoppedAtFront !== undefined &&
-                                   ambulance.stoppedAtFront > 0 &&
-                                   (now - ambulance.stoppedAtFront < AMBULANCE_STOP_DURATION);
+                                   ambulance.index === 0 &&
+                                   (ambulance.stoppedAtFront !== undefined && ambulance.stoppedAtFront > 0
+                                     ? (now - ambulance.stoppedAtFront < AMBULANCE_STOP_DURATION)
+                                     : true); // If not stopped yet, still consider it at front
 
           // Only update if the value changed
           if (lane.ambulanceAtFront !== ambulanceAtFront) {
@@ -61,6 +62,6 @@ export function useAmbulancePosition(
     const interval = setInterval(updateAmbulancePosition, 500); // Check every 500ms
 
     return () => clearInterval(interval);
-  }, [visualCars, setLanes]);
+  }, [visualCars, setLanes, lanes]);
 }
 
