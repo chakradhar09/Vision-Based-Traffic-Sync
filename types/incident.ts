@@ -13,3 +13,6 @@ export interface IncidentReport {
   reportedBy: 'citizen' | 'system';
 }
 
+
+
+
